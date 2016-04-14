@@ -1,0 +1,9 @@
+%{"certifi": {:hex, :certifi, "0.4.0"},
+  "hackney": {:hex, :hackney, "1.6.0"},
+  "idna": {:hex, :idna, "1.2.0"},
+  "metrics": {:hex, :metrics, "1.0.1"},
+  "mimerl": {:hex, :mimerl, "1.0.2"},
+  "nerves_ssdp_client": {:git, "https://github.com/nerves-project/nerves_ssdp_client", "f0ba3c47c7b4f3cc549dc1daa6fd4217ad0951bc", [tag: "v0.1.2"]},
+  "nerves_ssdp_server": {:git, "https://github.com/nerves-project/nerves_ssdp_server", "20bbd6e355b73a45eaca852a7b614e3e29e45b45", [tag: "v0.2.0"]},
+  "ssl_verify_fun": {:hex, :ssl_verify_fun, "1.1.0"},
+  "thermex": {:hex, :thermex, "0.0.2"}}
