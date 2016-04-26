@@ -14,7 +14,7 @@ defmodule AmbrosiaMonitor.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger, :hackney, :nerves_ssdp_server, :nerves_ssdp_client, :thermex],
+    [applications: [:logger, :hackney, :thermex],
      mod: {AmbrosiaMonitor, []}]
   end
 
@@ -22,8 +22,7 @@ defmodule AmbrosiaMonitor.Mixfile do
     [
       {:hackney, "~> 1.6"},
       {:thermex, "~> 0.0.1"},
-      {:nerves_ssdp_server, git: "https://github.com/nerves-project/nerves_ssdp_server", tag: "v0.2.0"},
-      {:nerves_ssdp_client, git: "https://github.com/nerves-project/nerves_ssdp_client", tag: "v0.1.2"},
+      {:sqlitex, "~> 1.0"},
     ]
   end
 end

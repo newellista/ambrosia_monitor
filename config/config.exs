@@ -28,3 +28,22 @@ use Mix.Config
 # here (which is why it is important to import them last).
 #
 #     import_config "#{Mix.env}.exs"
+
+if System.get_env("ambrosia_reporting_url") do
+  config :ambrosia_monitor, :config,
+    url: System.get_env("ambrosia_reporting_url")
+else
+  config :ambrosia_monitor, :config, url: "test.url"
+end
+
+if System.get_env("ambrosia_reporting_frequency") do
+  config :ambrosia_monitor, :config, frequency: System.get_env("ambrosia_reporting_frequency")
+else
+  config :ambrosia_monitor, :config, frequency: 30_000
+end
+
+if System.get_env("ambrosia_database") do
+  config :ambrosia_monitor, :config, database: System.get_env("ambrosia_database")
+else
+  config :ambrosia_monitor, :config, database: "ambrosia_temps.sqlite3"
+end
