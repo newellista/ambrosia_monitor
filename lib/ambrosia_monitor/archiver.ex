@@ -13,13 +13,17 @@ defmodule AmbrosiaMonitor.Archiver do
     {:ok, %{measurements: []}}
   end
 
+  def handle_info({_, _, _}=measurement, %{measurements: measurements}=state) do
+    {:noreply, %{state | measurements: [measurement | measurements]}}
+  end
+
   def handle_info(:record_temperature, %{measurements: []}=state) do
-    Logger.info "Nothing to record"
     {:noreply, state}
   end
   
   def handle_info(:record_temperature, %{measurements: measurements}=state) do
-    store_temperature(measurements)
+    measurements
+      |> Enum.map(&store_temperature/1)
     {:noreply, %{state | measurements: []}}
   end
 
@@ -37,8 +41,8 @@ defmodule AmbrosiaMonitor.Archiver do
     Sqlitex.Server.query(Sqlitex.Server, "CREATE TABLE IF NOT EXISTS temperature_readings(id INTEGER PRIMARY KEY AUTOINCREMENT, location text, serial_number text, temperature INTEGER, timestamp INTEGER, forwarded_at INTEGER)") |> IO.inspect
   end
 
-  defp store_temperature({location, serial, temperature, timestamp}) do
+  defp store_temperature({serial, temperature, timestamp}) do
     fahrenheit = celsius_to_fahrenheit(temperature)
-    Sqlitex.Server.query(Sqlitex.Server, "INSERT INTO temperature_readings(location, serial_number, temperature, timestamp) VALUES(#{location}, #{serial}, #{fahrenheit}, #{timestamp})") |> IO.inspect
+    Sqlitex.Server.query(Sqlitex.Server, "INSERT INTO temperature_readings(serial_number, temperature, timestamp) VALUES('#{serial}', #{fahrenheit}, #{timestamp})") |> IO.inspect
   end
 end

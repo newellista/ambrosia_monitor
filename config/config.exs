@@ -30,10 +30,9 @@ use Mix.Config
 #     import_config "#{Mix.env}.exs"
 
 if System.get_env("ambrosia_reporting_url") do
-  config :ambrosia_monitor, :config,
-    url: System.get_env("ambrosia_reporting_url")
+  config :ambrosia_monitor, :config, url: System.get_env("ambrosia_reporting_url")
 else
-  config :ambrosia_monitor, :config, url: "test.url"
+  config :ambrosia_monitor, :config, url: "http://104.131.15.48:8086/write?db=ambrosia_temperatures"
 end
 
 if System.get_env("ambrosia_reporting_frequency") do

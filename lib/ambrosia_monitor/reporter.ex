@@ -17,7 +17,7 @@ defmodule AmbrosiaMonitor.Reporter do
 
   def handle_info(:report_measurements, %{url: url}=state) do
     case get_new_measurements do
-      {:ok, []} -> Logger.info "Nothing to report"
+      {:ok, []} -> location("asdf")
       {:ok, records} -> 
         Logger.info "#{inspect records}"
         send_records(url, records)
@@ -28,27 +28,44 @@ defmodule AmbrosiaMonitor.Reporter do
   end
 
   defp send_records(url, records) do
-    body = Enum.map(records)
+    body = records |> IO.inspect
       |> Enum.map(&measurement_to_line/1)
       |> Enum.join("\n")
 
     IO.inspect body
-    # {:ok, _status_code, _headers, client_ref} = :hackney.request(:post, url, [], body, []) |> IO.inspect
-    # {:ok, _body} = :hackney.body(client_ref)
-    # {:noreply, %{state | measurements: []}}
+    IO.inspect url
+    case :hackney.request(:post, url, [], body, []) do
+      {:ok, _status_code, _headers, client_ref} ->
+        case :hackney.body(client_ref) do
+          {:ok, body} -> 
+            IO.inspect "############## Body: #{body}"
+            records 
+              |> Enum.map(&update_forward_time/1)
+          {:error, _status} ->
+            Logger.info "Unable to send body"
+          _ ->
+            Logger.info "Unknown Error"
+        end
+      {:error, status_code} ->
+        Logger.info "Error sending to #{url}: (#{status_code})"
+    end
   end
 
   defp get_new_measurements do
-    Sqlitex.Server.query(Sqlitex.Server, "SELECT id, serial_number, temperature, timestamp, forwarded_at FROM temperature_readings WHERE forwarded_at IS NULL", into: %{})
+    Sqlitex.Server.query(Sqlitex.Server, "SELECT id, serial_number, temperature, timestamp FROM temperature_readings WHERE forwarded_at IS NULL", into: %{})
   end
 
-  defp measurement_to_line({serial, fahrenheit, timestamp}) do
-    case location(serial) do
+  defp measurement_to_line(%{id: _, serial_number: _, temperature: _, timestamp: _}=line) do
+    case location(line.serial_number) do
       nil ->
-        "temperature,location=Unknown sensor=#{serial} value=#{fahrenheit} #{timestamp}000000"
+        "temperature,location=Unknown,sensor=#{line.serial_number} value=#{line.temperature} #{line.timestamp}000000"
       {location, sensor_name} ->
-        "temperature,location=#{location} sensor=#{sensor_name} value=#{fahrenheit} #{timestamp}000000"
+        "temperature,location=#{location},sensor=#{sensor_name} value=#{line.temperature} #{line.timestamp}000000"
     end
+  end
+
+  defp update_forward_time(%{id: _, serial_number: _, temperature: _, timestamp: _}=line) do
+    Sqlitex.Server.query(Sqlitex.Server, "UPDATE temperature_readings set forwarded_at=#{:os.system_time(:seconds)} where id=#{line.id}") |> IO.inspect
   end
 
   defp location(serial) do
