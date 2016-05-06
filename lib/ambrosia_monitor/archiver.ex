@@ -37,16 +37,16 @@ defmodule AmbrosiaMonitor.Archiver do
   end
 
   defp initialize_database(database) do
-    Logger.info "initialize_database"
+    Logger.info "Archiver: initialize_database"
     Sqlitex.with_db(database, fn(db) ->
-      Sqlitex.query(db, "CREATE TABLE IF NOT EXISTS temperature_readings(id INTEGER PRIMARY KEY AUTOINCREMENT, location text, serial_number text, temperature INTEGER, timestamp INTEGER, forwarded_at INTEGER)") |> IO.inspect
+      Sqlitex.query(db, "CREATE TABLE IF NOT EXISTS temperature_readings(id INTEGER PRIMARY KEY AUTOINCREMENT, location text, serial_number text, temperature INTEGER, timestamp INTEGER, forwarded_at INTEGER)")
     end)
   end
 
   defp store_temperature({serial, temperature, timestamp}, database) do
     fahrenheit = celsius_to_fahrenheit(temperature)
     Sqlitex.with_db(database, fn(db) ->
-      Sqlitex.query(db, "INSERT INTO temperature_readings(serial_number, temperature, timestamp) VALUES('#{serial}', #{fahrenheit}, #{timestamp})") |> IO.inspect
+      Sqlitex.query(db, "INSERT INTO temperature_readings(serial_number, temperature, timestamp) VALUES('#{serial}', #{fahrenheit}, #{timestamp})")
     end)
   end
 end
