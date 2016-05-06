@@ -46,3 +46,12 @@ if System.get_env("ambrosia_database") do
 else
   config :ambrosia_monitor, :config, database: "ambrosia_temps.sqlite3"
 end
+
+config :logger,
+  handle_otp_reports: true,
+  handle_sasl_reports: true,
+  backends: [{LoggerFileBackend, :error_log}]
+
+config :logger, :error_log,
+  path: "/var/log/ambrosia/error.log",
+  level: :debug

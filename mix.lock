@@ -3,6 +3,7 @@
   "esqlite": {:hex, :esqlite, "0.2.2"},
   "hackney": {:hex, :hackney, "1.6.0"},
   "idna": {:hex, :idna, "1.2.0"},
+  "logger_file_backend": {:hex, :logger_file_backend, "0.0.7"},
   "metrics": {:hex, :metrics, "1.0.1"},
   "mimerl": {:hex, :mimerl, "1.0.2"},
   "nerves_ssdp_client": {:git, "https://github.com/nerves-project/nerves_ssdp_client", "f0ba3c47c7b4f3cc549dc1daa6fd4217ad0951bc", [tag: "v0.1.2"]},
