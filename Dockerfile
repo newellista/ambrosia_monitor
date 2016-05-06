@@ -26,4 +26,4 @@ RUN apt-get update && apt-get install -y \
 COPY . /app
 WORKDIR /app
 RUN mix hex.registry fetch && mix deps.get && mix compile
-CMD modprobe w1-gpio && modprobe w1-therm && elixir --name "homebody@$(hostname).local" --cookie pi -S mix run --no-halt --no-deps-check
+CMD modprobe w1-gpio && modprobe w1-therm && elixir --name "ambrosia@$(hostname).local" --cookie ambrosia -S mix run --no-halt --no-deps-check
