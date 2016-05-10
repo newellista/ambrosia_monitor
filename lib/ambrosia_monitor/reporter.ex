@@ -67,10 +67,12 @@ defmodule AmbrosiaMonitor.Reporter do
   end
 
   defp update_forward_time(%{id: _, serial_number: _, temperature: _, timestamp: _}=line, database) do
-    Sqlitex.Server.query(Sqlitex.Server, "UPDATE temperature_readings set forwarded_at=#{:os.system_time(:milli_seconds)} where id=#{line.id}") |> IO.inspect
+    Sqlitex.with_db(database, fn(db) ->
+      Sqlitex.query(db, "UPDATE temperature_readings set forwarded_at=#{:os.system_time(:milli_seconds)} where id=#{line.id}") |> IO.inspect
+    end)
   end
 
-  defp location(serial) do
+  defp location(_serial) do
     # map serial number of probe to location and sensor name
     nil
   end
