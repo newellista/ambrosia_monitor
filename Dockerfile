@@ -3,6 +3,8 @@ ENV PATH /opt/elixir/bin:$PATH
 ENV LANG C.UTF-8
 ENV MIX_ENV production
 RUN apt-get update && apt-get install -y \
+    less \
+    vim \
     tree \
     curl \
     unzip \
