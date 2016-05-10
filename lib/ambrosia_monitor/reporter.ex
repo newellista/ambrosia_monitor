@@ -2,12 +2,12 @@ defmodule AmbrosiaMonitor.Reporter do
   use GenServer
   require Logger
 
-  def start_link(database, url, _frequency) do
-    GenServer.start_link(__MODULE__, {database, url}, name: __MODULE__)
+  def start_link(database, url, frequency) do
+    GenServer.start_link(__MODULE__, {database, url, frequency}, name: __MODULE__)
   end
 
-  def init(database, url) do
-    :timer.send_interval(5_000, :report_measurements)
+  def init(database, url, frequency) do
+    :timer.send_interval(frequency, :report_measurements)
     {:ok, %{database: database, url: url}}
   end
 
