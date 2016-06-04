@@ -8,7 +8,7 @@ defmodule AmbrosiaMonitor.Archiver do
 
   def init(url) do
     initialize_channel
-    :timer.send_interval(5_000, :record_temperature)
+    :timer.send_interval(30_000, :record_temperature)
     {:ok, %{url: url, measurements: []}}
   end
 
@@ -31,10 +31,10 @@ defmodule AmbrosiaMonitor.Archiver do
     :pg2.join(:thermex_measurements, self())
   end
 
-  defp store_temperature({serial, temperature, timestamp}, url) do
-    fahrenheit = celsius_to_fahrenheit(temperature)
+  defp store_temperature(url, %{serial, temperature, timestamp}=record) do
+    fahrenheit = celsius_to_fahrenheit(record.temperature)
     
-    body = measurement_to_line(%{serial_number: serial, temperature: fahrenheit, timestamp: timestamp})
+    body = measurement_to_line(%{serial_number: record.serial, temperature: fahrenheit, timestamp: record.timestamp})
     send_to_collector(url, body)
   end
 
