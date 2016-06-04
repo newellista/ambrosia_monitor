@@ -34,15 +34,3 @@ if System.get_env("ambrosia_reporting_url") do
 else
   config :ambrosia_monitor, :config, url: "http://104.131.15.48:8086/write?db=ambrosia_temperatures"
 end
-
-if System.get_env("ambrosia_reporting_frequency") do
-  config :ambrosia_monitor, :config, frequency: System.get_env("ambrosia_reporting_frequency")
-else
-  config :ambrosia_monitor, :config, frequency: 30_000
-end
-
-if System.get_env("ambrosia_database") do
-  config :ambrosia_monitor, :config, database: System.get_env("ambrosia_database")
-else
-  config :ambrosia_monitor, :config, database: "ambrosia_temps.sqlite3"
-end

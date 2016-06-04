@@ -2,28 +2,23 @@ defmodule AmbrosiaMonitor.Archiver do
   use GenServer
   require Logger
 
-  def start_link(database) do
-    GenServer.start_link(__MODULE__, database, name: __MODULE__)
+  def start_link(url) do
+    GenServer.start_link(__MODULE__, url, name: __MODULE__)
   end
 
-  def init(database) do
-    initialize_database(database)
+  def init(url) do
     initialize_channel
     :timer.send_interval(5_000, :record_temperature)
-    {:ok, %{database: database, measurements: []}}
+    {:ok, %{url: url, measurements: []}}
   end
 
-  def handle_info({_, _, _}=measurement, %{database: _, measurements: measurements}=state) do
+  def handle_info({_, _, _}=measurement, %{url: _, measurements: measurements}=state) do
     {:noreply, %{state | measurements: [measurement | measurements]}}
   end
 
-  def handle_info(:record_temperature, %{database: _, measurements: []}=state) do
-    {:noreply, state}
-  end
-  
-  def handle_info(:record_temperature, %{database: database, measurements: measurements}=state) do
+  def handle_info(:record_temperature, %{url: url, measurements: measurements}=state) do
     measurements
-      |> Enum.map(&store_temperature(&1, database))
+      |> Enum.map(&store_temperature(url, &1))
     {:noreply, %{state | measurements: []}}
   end
 
@@ -36,17 +31,40 @@ defmodule AmbrosiaMonitor.Archiver do
     :pg2.join(:thermex_measurements, self())
   end
 
-  defp initialize_database(database) do
-    Logger.info "Archiver: initialize_database"
-    Sqlitex.with_db(database, fn(db) ->
-      Sqlitex.query(db, "CREATE TABLE IF NOT EXISTS temperature_readings(id INTEGER PRIMARY KEY AUTOINCREMENT, location text, serial_number text, temperature INTEGER, timestamp INTEGER, forwarded_at INTEGER)")
-    end)
+  defp store_temperature({serial, temperature, timestamp}, url) do
+    fahrenheit = celsius_to_fahrenheit(temperature)
+    
+    body = measurement_to_line(%{serial_number: serial, temperature: fahrenheit, timestamp: timestamp})
+    send_to_collector(url, body)
   end
 
-  defp store_temperature({serial, temperature, timestamp}, database) do
-    fahrenheit = celsius_to_fahrenheit(temperature)
-    Sqlitex.with_db(database, fn(db) ->
-      Sqlitex.query(db, "INSERT INTO temperature_readings(serial_number, temperature, timestamp) VALUES('#{serial}', #{fahrenheit}, #{timestamp})")
-    end)
+  defp send_to_collector(url, body) do
+    case :hackney.request(:post, url, [], body, []) do
+      {:ok, _status_code, _headers, client_ref} ->
+        case :hackney.body(client_ref) do
+          {:ok, body} -> 
+            Logger.info "Update sent"
+          {:error, _status} ->
+            Logger.info "Unable to send body"
+          _ ->
+            Logger.info "Unknown Error"
+        end
+      {:error, status_code} ->
+        Logger.info "Error sending to #{url}: (#{status_code})"
+    end
+  end
+
+  defp measurement_to_line(%{serial_number: _, temperature: _, timestamp: _}=line) do
+    case location(line.serial_number) do
+      nil ->
+        "temperature,location=Unknown,sensor=#{line.serial_number} value=#{line.temperature} #{line.timestamp}000000"
+      {location, sensor_name} ->
+        "temperature,location=#{location},sensor=#{sensor_name} value=#{line.temperature} #{line.timestamp}000000"
+    end
+  end
+
+  defp location(_serial) do
+    # map serial number of probe to location and sensor name
+    nil
   end
 end

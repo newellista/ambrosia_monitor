@@ -21,9 +21,7 @@ defmodule AmbrosiaMonitor.Mixfile do
   defp deps do
     [
       {:hackney, "~> 1.6"},
-      {:thermex, "~> 0.0.1"},
-      {:sqlitex, "~> 1.0"},
-      {:logger_file_backend, "~> 0.0.4"},
+      {:thermex, "~> 0.0.1"}
     ]
   end
 end

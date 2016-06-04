@@ -7,9 +7,8 @@ defmodule AmbrosiaMonitor do
     import Supervisor.Spec, warn: false
     
     children = case Application.get_env(:ambrosia_monitor, :config) do
-      [url: url, frequency: frequency, database: database] -> [
-        worker(AmbrosiaMonitor.Archiver, [database]), 
-        worker(AmbrosiaMonitor.Reporter, [database, url, frequency])
+      [url: url] -> [
+        worker(AmbrosiaMonitor.Archiver, [url]), 
       ]
       nil -> Process.exit(self, "Invalid Environment")
     end
