@@ -43,7 +43,7 @@ defmodule AmbrosiaMonitor.Archiver do
       {:ok, _status_code, _headers, client_ref} ->
         case :hackney.body(client_ref) do
           {:ok, body} -> 
-            Logger.info "Update sent"
+            Logger.info "Update sent: #{body}"
           {:error, _status} ->
             Logger.info "Unable to send body"
           _ ->
