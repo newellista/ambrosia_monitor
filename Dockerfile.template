@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     unzip \
     git \
+    wireless-tools \
     ca-certificates \
     build-essential \
   && echo "deb http://packages.erlang-solutions.com/debian wheezy contrib" >> /etc/apt/sources.list \
@@ -27,4 +28,4 @@ RUN apt-get update && apt-get install -y \
 COPY . /app
 WORKDIR /app
 RUN mix hex.registry fetch && mix deps.get && mix compile
-CMD modprobe w1-gpio && modprobe w1-therm && elixir --name "ambrosia@$(hostname).local" --cookie ambrosia -S mix run --no-halt --no-deps-check
+CMD modprobe w1-gpio && modprobe w1-therm && elixir -S mix run --no-halt --no-deps-check
