@@ -17,8 +17,12 @@ defmodule AmbrosiaMonitor.Archiver do
   end
 
   def handle_info(:record_temperature, %{url: url, measurements: measurements}=state) do
-    measurements
-      |> Enum.map(&store_temperature(&1, url))
+    records = 
+      measurements
+        |> Enum.map(&format_record(&1))
+
+    send_to_collector(url, Enum.join(records, "\n"))
+
     {:noreply, %{state | measurements: []}}
   end
 
@@ -31,11 +35,9 @@ defmodule AmbrosiaMonitor.Archiver do
     :pg2.join(:thermex_measurements, self())
   end
 
-  defp store_temperature({serial, temperature, timestamp}, url) do
+  defp format_record({serial, temperature, timestamp}) do
     fahrenheit = celsius_to_fahrenheit(temperature)
-    
-    body = measurement_to_line(%{serial_number: serial, temperature: fahrenheit, timestamp: timestamp})
-    send_to_collector(url, body)
+    measurement_to_line(%{serial_number: serial, temperature: fahrenheit, timestamp: timestamp})
   end
 
   defp send_to_collector(url, body) do
